@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS-GUARD X — AI-Driven Multi-Vendor Network Security Compliance Auditor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#05070B;
+  --panel:#0B1118;
+  --panel2:#0E1620;
+  --primary:#00E5FF;
+  --primary-dim: rgba(0,229,255,0.14);
+  --success:#22C55E;
+  --warning:#F59E0B;
+  --critical:#EF4444;
+  --text:#E5E7EB;
+  --muted:#94A3B8;
+  --border: rgba(148,163,184,0.14);
+  --border-strong: rgba(148,163,184,0.26);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background:
+    radial-gradient(ellipse 1200px 600px at 15% -10%, rgba(0,229,255,0.07), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 100% 0%, rgba(0,229,255,0.05), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+.mono{font-family:'JetBrains Mono',monospace;}
+::selection{background:var(--primary-dim); color:var(--primary);}
+::-webkit-scrollbar{width:8px; height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-strong); border-radius:4px;}
+
+a{color:inherit; text-decoration:none;}
+button{font-family:inherit; cursor:pointer;}
+
+/* ===== LANDING ===== */
+#landing{
+  min-height:100vh;
+  display:flex; flex-direction:column;
+  position:relative;
+}
+.landing-nav{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:28px 56px;
+  position:relative; z-index:5;
+}
+.brand{display:flex; align-items:center; gap:12px;}
+.brand-mark{
+  width:34px; height:34px; border-radius:8px;
+  background:linear-gradient(135deg, var(--primary), #0891b2);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 24px rgba(0,229,255,0.35);
+}
+.brand-mark svg{width:18px; height:18px;}
+.brand-name{font-weight:700; font-size:15px; letter-spacing:0.5px;}
+.brand-name span{color:var(--primary);}
+.landing-nav-links{display:flex; gap:36px; align-items:center;}
+.landing-nav-links a{color:var(--muted); font-size:13.5px; font-weight:500; transition:color .2s;}
+.landing-nav-links a:hover{color:var(--text);}
+.nav-cta{
+  background:var(--primary); color:#03151a; padding:9px 18px; border-radius:7px;
+  font-weight:600; font-size:13.5px; border:none;
+}
+
+.hero{
+  flex:1; display:grid; grid-template-columns:1.05fr 0.95fr; align-items:center;
+  gap:40px; padding:20px 56px 60px; position:relative; z-index:2;
+}
+.hero-left{max-width:560px;}
+.ps-tag{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 12px; border:1px solid var(--border-strong); border-radius:100px;
+  font-size:11.5px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:26px;
+}
+.ps-tag .dot{width:6px; height:6px; border-radius:50%; background:var(--success); box-shadow:0 0 8px var(--success);}
+.hero h1{
+  font-size:56px; line-height:1.04; font-weight:800; letter-spacing:-1.5px;
+  margin-bottom:22px;
+}
+.hero h1 .grad{
+  background:linear-gradient(100deg, var(--primary), #7dd3fc 60%, var(--primary));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero p.lead{
+  font-size:17px; line-height:1.65; color:var(--muted); margin-bottom:34px; max-width:520px;
+}
+.hero-actions{display:flex; gap:14px; margin-bottom:44px;}
+.btn-primary{
+  background:var(--primary); color:#03151a; padding:14px 24px; border-radius:9px;
+  font-weight:700; font-size:14.5px; border:none; display:flex; align-items:center; gap:8px;
+  box-shadow:0 0 30px rgba(0,229,255,0.25); transition:transform .15s, box-shadow .15s;
+}
+.btn-primary:hover{transform:translateY(-1px); box-shadow:0 0 40px rgba(0,229,255,0.4);}
+.btn-ghost{
+  background:transparent; color:var(--text); padding:14px 22px; border-radius:9px;
+  font-weight:600; font-size:14.5px; border:1px solid var(--border-strong);
+  transition:border-color .15s, background .15s;
+}
+.btn-ghost:hover{border-color:var(--primary); background:rgba(0,229,255,0.05);}
+.hero-stats{display:flex; gap:38px;}
+.hero-stat b{display:block; font-size:24px; font-weight:800; font-family:'JetBrains Mono',monospace;}
+.hero-stat span{font-size:12px; color:var(--muted);}
+
+.hero-right{position:relative; height:520px;}
+.twin-frame{
+  position:absolute; inset:0; border:1px solid var(--border); border-radius:16px;
+  background:linear-gradient(180deg, rgba(11,17,24,0.6), rgba(11,17,24,0.9));
+  backdrop-filter:blur(6px); overflow:hidden;
+}
+.twin-frame-label{
+  position:absolute; top:16px; left:18px; font-size:11px; color:var(--muted);
+  font-family:'JetBrains Mono',monospace; letter-spacing:0.5px; z-index:3;
+}
+.twin-frame-badge{
+  position:absolute; top:14px; right:16px; z-index:3; font-size:10.5px;
+  font-family:'JetBrains Mono',monospace; color:var(--critical);
+  border:1px solid rgba(239,68,68,0.4); background:rgba(239,68,68,0.08);
+  padding:4px 9px; border-radius:100px;
+}
+
+/* background particle grid */
+.grid-bg{
+  position:absolute; inset:0; z-index:0; opacity:0.5;
+  background-image: linear-gradient(rgba(148,163,184,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.05) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image: radial-gradient(ellipse 900px 500px at 30% 20%, black, transparent 75%);
+}
+
+/* ===== APP SHELL ===== */
+#app{display:none; min-height:100vh;}
+#app.active{display:flex;}
+.sidebar{
+  width:236px; flex-shrink:0; background:rgba(11,17,24,0.7); backdrop-filter:blur(10px);
+  border-right:1px solid var(--border); display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh;
+}
+.sidebar-brand{padding:22px 20px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border);}
+.sidebar-nav{flex:1; overflow-y:auto; padding:14px 12px;}
+.nav-section-label{
+  font-size:10.5px; color:var(--muted); font-weight:600; letter-spacing:0.6px;
+  padding:14px 12px 6px; text-transform:uppercase;
+}
+.nav-item{
+  display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:8px;
+  color:var(--muted); font-size:13.5px; font-weight:500; margin-bottom:2px;
+  transition:background .15s, color .15s; position:relative;
+}
+.nav-item svg{width:16px; height:16px; flex-shrink:0;}
+.nav-item:hover{background:rgba(255,255,255,0.04); color:var(--text);}
+.nav-item.active{background:var(--primary-dim); color:var(--primary);}
+.nav-item.active::before{
+  content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+  width:3px; height:16px; background:var(--primary); border-radius:0 3px 3px 0;
+}
+.nav-badge{margin-left:auto; font-size:10px; font-family:'JetBrains Mono',monospace; padding:1px 6px; border-radius:100px; background:rgba(239,68,68,0.15); color:var(--critical);}
+.sidebar-footer{padding:14px; border-top:1px solid var(--border); font-size:11px; color:var(--muted);}
+
+.main{flex:1; min-width:0; display:flex; flex-direction:column;}
+.topbar{
+  height:62px; border-bottom:1px solid var(--border); display:flex; align-items:center;
+  justify-content:space-between; padding:0 26px; position:sticky; top:0; background:rgba(5,7,11,0.85);
+  backdrop-filter:blur(10px); z-index:10;
+}
+.topbar-title{font-size:15px; font-weight:700;}
+.topbar-sub{font-size:11.5px; color:var(--muted); margin-top:1px;}
+.topbar-right{display:flex; align-items:center; gap:18px;}
+.topbar-pill{
+  display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--muted);
+  font-family:'JetBrains Mono',monospace; border:1px solid var(--border); padding:6px 11px; border-radius:100px;
+}
+.topbar-pill .dot{width:6px; height:6px; border-radius:50%; background:var(--success);}
+.avatar{width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,#1e293b,#334155); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; border:1px solid var(--border-strong);}
+
+.page{display:none; padding:26px; animation:fadeIn .25s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+.page-head{margin-bottom:22px;}
+.page-head h2{font-size:20px; font-weight:800; letter-spacing:-0.3px; margin-bottom:4px;}
+.page-head p{font-size:13px; color:var(--muted);}
+
+.grid{display:grid; gap:16px;}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g2{grid-template-columns:repeat(2,1fr);}
+.g5{grid-template-columns:repeat(5,1fr);}
+@media(max-width:1200px){.g4{grid-template-columns:repeat(2,1fr);} .g5{grid-template-columns:repeat(3,1fr);} .g3{grid-template-columns:repeat(2,1fr);}}
+
+.panel{
+  background:linear-gradient(180deg, rgba(14,22,32,0.7), rgba(11,17,24,0.7));
+  border:1px solid var(--border); border-radius:12px; padding:18px;
+}
+.panel-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.panel-head h3{font-size:13.5px; font-weight:700;}
+.panel-head .tag{font-size:10.5px; color:var(--muted); font-family:'JetBrains Mono',monospace;}
+
+.stat-card{position:relative; overflow:hidden;}
+.stat-card .label{font-size:11.5px; color:var(--muted); margin-bottom:10px; display:flex; align-items:center; gap:6px;}
+.stat-card .val{font-size:30px; font-weight:800; font-family:'JetBrains Mono',monospace; letter-spacing:-1px;}
+.stat-card .delta{font-size:11px; margin-top:8px; font-weight:600;}
+.up{color:var(--success);} .down{color:var(--critical);}
+.stat-icon{position:absolute; right:14px; top:14px; width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;}
+.stat-icon svg{width:15px;height:15px;}
+
+.badge{display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:100px; font-family:'JetBrains Mono',monospace; letter-spacing:0.3px;}
+.b-critical{background:rgba(239,68,68,0.12); color:var(--critical); border:1px solid rgba(239,68,68,0.3);}
+.b-high{background:rgba(245,158,11,0.12); color:var(--warning); border:1px solid rgba(245,158,11,0.3);}
+.b-medium{background:rgba(0,229,255,0.1); color:var(--primary); border:1px solid rgba(0,229,255,0.28);}
+.b-low{background:rgba(148,163,184,0.1); color:var(--muted); border:1px solid var(--border-strong);}
+.b-success{background:rgba(34,197,94,0.12); color:var(--success); border:1px solid rgba(34,197,94,0.3);}
+
+table{width:100%; border-collapse:collapse; font-size:12.8px;}
+th{text-align:left; color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.4px; padding:8px 12px; border-bottom:1px solid var(--border);}
+td{padding:12px; border-bottom:1px solid var(--border); vertical-align:middle;}
+tbody tr{transition:background .15s;}
+tbody tr:hover{background:rgba(255,255,255,0.025); cursor:pointer;}
+
+.progress{height:6px; border-radius:4px; background:rgba(255,255,255,0.06); overflow:hidden; position:relative;}
+.progress > div{height:100%; border-radius:4px; transition:width 1s cubic-bezier(.2,.8,.2,1);}
+
+.btn{padding:9px 16px; border-radius:8px; font-size:12.5px; font-weight:600; border:1px solid var(--border-strong); background:transparent; color:var(--text); transition:all .15s;}
+.btn:hover{border-color:var(--primary); color:var(--primary); background:rgba(0,229,255,0.05);}
+.btn.solid{background:var(--primary); color:#03151a; border:none;}
+.btn.solid:hover{color:#03151a; box-shadow:0 0 20px rgba(0,229,255,0.3);}
+.btn.danger{border-color:rgba(239,68,68,0.4); color:var(--critical);}
+.btn.danger:hover{background:rgba(239,68,68,0.08); border-color:var(--critical);}
+.btn:disabled{opacity:0.4; cursor:not-allowed;}
+.btn.sm{padding:6px 12px; font-size:11.5px;}
+
+.chip{display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; border:1px solid var(--border-strong); font-size:12px; color:var(--muted); font-weight:500;}
+.chip.active{border-color:var(--primary); color:var(--primary); background:rgba(0,229,255,0.06);}
+
+.flow-step{display:flex; align-items:center; gap:12px;}
+.flow-node{
+  flex:1; border:1px solid var(--border-strong); border-radius:10px; padding:14px 16px;
+  background:rgba(255,255,255,0.02); text-align:center;
+}
+.flow-node .t{font-size:12.5px; font-weight:700; margin-bottom:3px;}
+.flow-node .s{font-size:10.5px; color:var(--muted); font-family:'JetBrains Mono',monospace;}
+.flow-arrow{color:var(--primary); flex-shrink:0;}
+.flow-node.live{border-color:var(--primary); box-shadow:0 0 20px rgba(0,229,255,0.15);}
+
+.modal-overlay{
+  display:none; position:fixed; inset:0; background:rgba(2,4,7,0.7); backdrop-filter:blur(3px);
+  z-index:100; align-items:center; justify-content:center; padding:24px;
+}
+.modal-overlay.active{display:flex;}
+.modal{
+  width:560px; max-width:100%; max-height:85vh; overflow-y:auto;
+  background:var(--panel2); border:1px solid var(--border-strong); border-radius:14px; padding:24px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.modal-close{position:absolute; top:16px; right:16px; color:var(--muted); background:none; border:none; font-size:18px;}
+
+.gauge-wrap{position:relative; width:180px; height:180px; margin:0 auto;}
+
+.code-line{font-family:'JetBrains Mono',monospace; font-size:12px; padding:3px 10px; border-radius:4px; white-space:pre;}
+.diff-add{background:rgba(34,197,94,0.1); color:#86efac; border-left:2px solid var(--success);}
+.diff-del{background:rgba(239,68,68,0.1); color:#fca5a5; border-left:2px solid var(--critical);}
+.diff-ctx{color:var(--muted); border-left:2px solid transparent;}
+
+.pulse{animation:pulseAnim 2.4s infinite;}
+@keyframes pulseAnim{0%,100%{opacity:1;} 50%{opacity:0.55;}}
+
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<div id="landing">
+  <div class="grid-bg"></div>
+  <nav class="landing-nav">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5v6c0 5 3.4 8.7 8 9.9C16.6 19.7 20 16 20 11V5l-8-3z" stroke="#03151a" stroke-width="2" stroke-linejoin="round"/></svg></div>
+      <div class="brand-name">NEXUS-GUARD <span>X</span></div>
+    </div>
+    <div class="landing-nav-links">
+      <a href="#" onclick="return false;">Platform</a>
+      <a href="#" onclick="return false;">Attack-Path Intelligence</a>
+      <a href="#" onclick="return false;">Compliance</a>
+      <a href="#" onclick="return false;">SIH26155</a>
+    </div>
+    <button class="nav-cta" onclick="launchApp()">Launch Console</button>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-left">
+      <div class="ps-tag"><span class="dot pulse"></span> PS ID SIH26155 · NTRO · Blockchain &amp; Cybersecurity</div>
+      <h1>From configuration compliance to <span class="grad">attack-path intelligence.</span></h1>
+      <p class="lead">NEXUS-GUARD X reads Cisco, Fortinet, Palo Alto and unfamiliar vendor configurations, builds a vendor-neutral security model, and shows which misconfiguration actually creates an exploitable path to a critical asset — not just which line fails a checklist.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="launchApp()">
+          Launch Security Console
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-ghost" onclick="launchApp('page-twin')">Explore Demo</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>24</b><span>Devices monitored</span></div>
+        <div class="hero-stat"><b>4</b><span>Active attack paths</span></div>
+        <div class="hero-stat"><b>78%</b><span>Compliance score</span></div>
+        <div class="hero-stat"><b>42%</b><span>Top remediation impact</span></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="twin-frame">
+        <div class="twin-frame-label">SECURITY DIGITAL TWIN — LIVE MODEL</div>
+        <div class="twin-frame-badge">2 PATHS EXPOSED</div>
+        <svg id="hero-twin-svg" viewBox="0 0 480 500" style="width:100%; height:100%;"></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark" style="width:28px;height:28px;"><svg viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;"><path d="M12 2L4 5v6c0 5 3.4 8.7 8 9.9C16.6 19.7 20 16 20 11V5l-8-3z" stroke="#03151a" stroke-width="2" stroke-linejoin="round"/></svg></div>
+      <div class="brand-name" style="font-size:13.5px;">NEXUS-GUARD <span style="color:var(--primary);">X</span></div>
+    </div>
+    <div class="sidebar-nav" id="sidebar-nav"></div>
+    <div class="sidebar-footer">
+      <div class="mono" style="color:var(--muted);">NTRO · SIH26155</div>
+      <div style="margin-top:4px;">Session: <span style="color:var(--success);">verified</span></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Executive Dashboard</div>
+        <div class="topbar-sub" id="topbar-sub">Organization-wide security posture</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-pill"><span class="dot"></span> All engines nominal</div>
+        <div class="topbar-pill">Org Compliance <b style="color:var(--text); margin-left:2px;">78%</b></div>
+        <div class="avatar">AN</div>
+      </div>
+    </div>
+    <div id="pages"></div>
+  </div>
+</div>
+
+<!-- ============ FINDING DETAIL MODAL ============ -->
+<div class="modal-overlay" id="finding-modal">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeModal('finding-modal')">✕</button>
+    <div id="finding-modal-body"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   DEMO DATA — clearly labeled synthetic data for prototype
+   ========================================================= */
+
+const DEVICES = [
+  {id:'d1', name:'Cisco-Router-01', vendor:'Cisco', type:'Router', os:'IOS 15.7', criticality:'High', compliance:71, risk:74, ip:'10.10.2.1'},
+  {id:'d2', name:'Cisco-Switch-02', vendor:'Cisco', type:'Switch', os:'IOS-XE 17.3', criticality:'Medium', compliance:88, risk:31, ip:'10.10.2.2'},
+  {id:'d3', name:'Fortinet-FW-01', vendor:'Fortinet', type:'Firewall', os:'FortiOS 7.2', criticality:'Critical', compliance:64, risk:91, ip:'10.10.0.1'},
+  {id:'d4', name:'Fortinet-FW-02', vendor:'Fortinet', type:'Firewall', os:'FortiOS 7.0', criticality:'High', compliance:79, risk:52, ip:'10.10.0.2'},
+  {id:'d5', name:'PaloAlto-FW-01', vendor:'Palo Alto', type:'Firewall', os:'PAN-OS 11.0', criticality:'Critical', compliance:85, risk:38, ip:'10.10.0.3'},
+  {id:'d6', name:'PaloAlto-FW-02', vendor:'Palo Alto', type:'Firewall', os:'PAN-OS 10.2', criticality:'High', compliance:81, risk:44, ip:'10.10.0.4'},
+  {id:'d7', name:'Juniper-Gateway-01', vendor:'Juniper', type:'Gateway', os:'Junos 21.4', criticality:'Medium', compliance:90, risk:22, ip:'10.10.1.1'},
+  {id:'d8', name:'Generic-EdgeAppliance-04', vendor:'Unknown', type:'Appliance', os:'unclassified', criticality:'Medium', compliance:58, risk:63, ip:'10.10.5.4'},
+];
+
+const FINDINGS = [
+  {id:'F-1027', title:'Overly Permissive Inbound Rule (any/any on WAN)', device:'Fortinet-FW-01', vendor:'Fortinet', severity:'Critical', framework:'CIS 9.2', asset:'Production Database', attackPath:true, risk:91, evidence:'config firewall policy\\n  set srcintf "wan1"\\n  set dstintf "internal"\\n  set srcaddr "all"\\n  set action accept', why:'The rule allows unrestricted inbound access from any source address to the internal segment, which materially increases exposure of the production database tier behind it.', fix:'Restrict srcaddr to approved management CIDR blocks and scope dstaddr to only the required internal service.', impact:42},
+  {id:'F-1041', title:'Telnet Management Enabled', device:'Cisco-Router-01', vendor:'Cisco', severity:'Critical', framework:'STIG V-3000', asset:'Core Router', attackPath:true, risk:87, evidence:'line vty 0 4\\n transport input telnet', why:'Telnet transmits credentials and session data in clear text, allowing on-path credential capture on any intermediate segment.', fix:'Disable telnet and enforce SSHv2 with key-based authentication on all VTY lines.', impact:31},
+  {id:'F-1052', title:'Weak SSH Cipher Configuration', device:'Cisco-Router-01', vendor:'Cisco', severity:'High', framework:'NIST SP 800-53 SC-13', asset:'Core Router', attackPath:false, risk:58, evidence:'ip ssh server algorithm encryption aes128-cbc 3des-cbc', why:'CBC-mode and 3DES ciphers are considered weak and are susceptible to known plaintext-recovery attacks.', fix:'Restrict SSH to AES-GCM/CTR cipher suites only and disable legacy algorithms.', impact:14},
+  {id:'F-1063', title:'Missing Centralized Logging', device:'Fortinet-FW-02', vendor:'Fortinet', severity:'Medium', framework:'ISO 27001 A.12.4', asset:'DMZ Segment', attackPath:false, risk:41, evidence:'config log syslogd setting\\n  set status disable', why:'Without centralized logging, lateral movement through the DMZ segment cannot be reconstructed during incident response.', fix:'Enable syslog forwarding to the central SIEM with appropriate severity thresholds.', impact:9},
+  {id:'F-1078', title:'Excessive Administrative Access Group', device:'PaloAlto-FW-01', vendor:'Palo Alto', severity:'High', framework:'CIS 5.1', asset:'Perimeter Firewall', attackPath:true, risk:66, evidence:'set mgt-config users admin permissions role-based superuser yes', why:'Multiple accounts hold superuser privileges beyond the administrators who require them, widening the blast radius of a single compromised credential.', fix:'Apply role-based access control and reduce standing superuser membership to two break-glass accounts.', impact:19},
+  {id:'F-1089', title:'Insufficient Session Timeout', device:'PaloAlto-FW-02', vendor:'Palo Alto', severity:'Medium', framework:'DISA STIG V-4212', asset:'Perimeter Firewall', attackPath:false, risk:36, evidence:'set deviceconfig system timeout 0', why:'A disabled idle timeout leaves authenticated management sessions open indefinitely on unattended terminals.', fix:'Set an idle session timeout of 10 minutes or less for all administrative interfaces.', impact:6},
+  {id:'F-1094', title:'Unnecessary Exposed Service (SNMP v1)', device:'Cisco-Switch-02', vendor:'Cisco', severity:'High', framework:'NIST SP 800-53 CM-7', asset:'Distribution Switch', attackPath:true, risk:61, evidence:'snmp-server community public RO', why:'SNMPv1 with a default community string exposes device configuration data to any host that can reach the management VLAN.', fix:'Migrate to SNMPv3 with authPriv and remove default community strings.', impact:12},
+  {id:'F-1102', title:'Weak Password Policy on Local Accounts', device:'Generic-EdgeAppliance-04', vendor:'Unknown', severity:'Medium', framework:'CIS 5.2', asset:'Edge Appliance', attackPath:false, risk:33, evidence:'(vendor-neutral mapping) password-min-length: 6', why:'The configured minimum password length falls below the organizational baseline, increasing susceptibility to credential brute-forcing.', fix:'Raise minimum password length to 14 characters with complexity enforcement.', impact:5},
+  {id:'F-1115', title:'Segmentation Gap Between DMZ and Internal VLAN', device:'Fortinet-FW-01', vendor:'Fortinet', severity:'Critical', framework:'ISO 27001 A.13.1', asset:'Production Database', attackPath:true, risk:79, evidence:'config system interface\\n  edit "dmz"\\n  set allowaccess ping https ssh', why:'The DMZ interface can directly reach internal management access, removing the intended containment boundary if the DMZ host is compromised.', fix:'Introduce an intermediate ACL denying DMZ-to-internal management traffic by default.', impact:24},
+  {id:'F-1128', title:'Outdated TLS Version Permitted', device:'PaloAlto-FW-01', vendor:'Palo Alto', severity:'Low', framework:'NIST SP 800-53 SC-8', asset:'Perimeter Firewall', attackPath:false, risk:19, evidence:'set ssl-tls-service-profile min-version tls1-0', why:'TLS 1.0 permits use of deprecated cipher suites vulnerable to downgrade-style attacks.', fix:'Set minimum TLS version to 1.2 across all SSL/TLS service profiles.', impact:3},
+];
+
+const FRAMEWORKS = [
+  {id:'cis', name:'CIS', score:82},
+  {id:'nist', name:'NIST SP 800-53', score:74},
+  {id:'stig', name:'DISA STIG', score:71},
+  {id:'iso', name:'ISO/IEC 27001', score:85},
+];
+
+const REGRESSION_TIMELINE = [
+  {d:'Aug 25', v:91},{d:'Aug 26', v:89},{d:'Aug 27', v:93},{d:'Aug 28', v:84},{d:'Aug 29', v:78},{d:'Aug 30', v:80},{d:'Aug 31', v:78}
+];
+
+const DNA_DIMENSIONS = ['Exposure','Access Control','Encryption','Logging','Segmentation','Authentication'];
+const DNA_DATA = {
+  'd1': [78,58,66,52,60,71],
+  'd2': [30,80,84,74,82,86],
+  'd3': [88,55,60,40,48,62],
+  'd4': [46,72,78,68,70,80],
+  'd5': [35,84,91,78,85,88],
+  'd6': [41,79,82,70,76,83],
+  'd7': [22,88,90,84,90,92],
+  'd8': [67,48,50,34,40,55],
+};
+
+const UNKNOWN_CONFIGS = [
+  {cmd:'set idle-timer session-expire 0', guess:'Administrative session timeout disabled', conf:87},
+  {cmd:'policy-object acl-bind zone-trust any-any permit', guess:'Overly permissive zone-based ACL binding', conf:79},
+  {cmd:'auth-profile local-db min-complexity low', guess:'Weak local authentication complexity policy', conf:92},
+  {cmd:'mgmt-service http enable port 80', guess:'Unencrypted management service exposed', conf:95},
+];
+
+let learnedMappings = 17;
+let vendorPatterns = 12;
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+const ICONS = {
+  dashboard:'<path d="M3 13h8V3H3v10zM13 21h8V9h-8v12zM3 21h8v-6H3v6zM13 7h8V3h-8v4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+  devices:'<rect x="3" y="4" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 20h8M12 16v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  upload:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  pipeline:'<circle cx="5" cy="12" r="2.4" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="12" r="2.4" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="5" r="2.4" stroke="currentColor" stroke-width="1.8"/><path d="M7.2 11l3-4M16.8 11l-3-4M7.4 12h9.2" stroke="currentColor" stroke-width="1.8"/>',
+  twin:'<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="4" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="20" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="4" cy="18" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="20" cy="18" r="2" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 10.5L5.5 7M14.5 10.5L18.5 7M9.5 13.5L5.5 17M14.5 13.5L18.5 17" stroke="currentColor" stroke-width="1.6"/>',
+  path:'<path d="M4 19c4-1 5-6 9-7s6-6 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="4" cy="19" r="1.6" fill="currentColor"/><circle cx="20" cy="5" r="1.6" fill="currentColor"/>',
+  dna:'<path d="M6 3c0 6 12 6 12 12M18 21c0-6-12-6-12-12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 6h8M8 18h8" stroke="currentColor" stroke-width="1.8"/>',
+  compliance:'<path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/>',
+  findings:'<path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.3 3.86L2.8 18a2 2 0 001.7 3h15a2 2 0 001.7-3L13.7 3.86a2 2 0 00-3.4 0z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+  priority:'<path d="M4 21V10M12 21V3M20 21v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  remediation:'<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.1-3.1a5 5 0 01-6.6 6.6L6.4 20.6a2 2 0 01-2.8-2.8L11.4 10a5 5 0 016.6-6.6l-3 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+  simulator:'<path d="M4 12a8 8 0 0116 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 12l4-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/>',
+  diff:'<path d="M8 3v18M16 3v18M4 8h4M16 8h4M4 16h4M16 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  trainer:'<path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+  reports:'<path d="M7 3h8l4 4v14H7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12h6M9 16h6M9 8h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+  history:'<path d="M3 12a9 9 0 109-9" stroke="currentColor" stroke-width="1.8"/><path d="M3 4v5h5M12 7v6l4 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  settings:'<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 13.5a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.9 2.9l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.6V20a2 2 0 11-4 0v-.2a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.9-2.9l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.6-1H4a2 2 0 110-4h.2a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.9-2.9l.1.1a1.7 1.7 0 001.9.3H10a1.7 1.7 0 001-1.6V4a2 2 0 114 0v.2a1.7 1.7 0 001 1.6 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.9 2.9l-.1.1a1.7 1.7 0 00-.3 1.9V10a1.7 1.7 0 001.6 1H20a2 2 0 110 4h-.2a1.7 1.7 0 00-1.6 1z" stroke="currentColor" stroke-width="1.5"/>',
+};
+
+const NAV = [
+  {section:'Overview', items:[
+    {id:'page-dashboard', label:'Dashboard', icon:'dashboard'},
+    {id:'page-devices', label:'Device Inventory', icon:'devices'},
+    {id:'page-upload', label:'Configuration Upload', icon:'upload'},
+    {id:'page-analysis', label:'Configuration Analysis', icon:'pipeline'},
+  ]},
+  {section:'Security Intelligence', items:[
+    {id:'page-twin', label:'Security Digital Twin', icon:'twin'},
+    {id:'page-attackpaths', label:'Attack Paths', icon:'path', badge:'4'},
+    {id:'page-dna', label:'Security DNA', icon:'dna'},
+  ]},
+  {section:'Compliance & Risk', items:[
+    {id:'page-compliance', label:'Compliance Center', icon:'compliance'},
+    {id:'page-findings', label:'Findings', icon:'findings'},
+    {id:'page-priority', label:'Risk Prioritization', icon:'priority'},
+  ]},
+  {section:'Remediation', items:[
+    {id:'page-remediation', label:'Remediation Center', icon:'remediation'},
+    {id:'page-simulator', label:'What-if Simulator', icon:'simulator'},
+    {id:'page-diff', label:'Configuration Diff', icon:'diff'},
+    {id:'page-trainer', label:'AI Configuration Trainer', icon:'trainer'},
+  ]},
+  {section:'Operations', items:[
+    {id:'page-reports', label:'Reports', icon:'reports'},
+    {id:'page-history', label:'Audit History', icon:'history'},
+    {id:'page-settings', label:'Settings', icon:'settings'},
+  ]},
+];
+
+const PAGE_META = {
+  'page-dashboard':['Executive Dashboard','Organization-wide security posture'],
+  'page-devices':['Device Inventory','24 devices across 4 vendor families'],
+  'page-upload':['Configuration Upload','Ingest raw vendor configurations for analysis'],
+  'page-analysis':['Configuration Analysis','Raw config to vendor-neutral security model'],
+  'page-twin':['Security Digital Twin','Interactive visual model — not connected to production'],
+  'page-attackpaths':['Attack-Path Intelligence','Potential paths from exposure to critical assets'],
+  'page-dna':['Security DNA','Per-device and organization-wide security profile'],
+  'page-compliance':['Compliance Center','CIS · NIST SP 800-53 · DISA STIG · ISO/IEC 27001'],
+  'page-findings':['Findings','All detected compliance and security findings'],
+  'page-priority':['Risk Prioritization Engine','Findings ranked by exploitability and business impact'],
+  'page-remediation':['Remediation Impact Ranking','Which single fix reduces the most risk'],
+  'page-simulator':['What-if Security Simulator','Model a remediation before touching production'],
+  'page-diff':['Configuration Diff Intelligence','Compare configuration states and their security impact'],
+  'page-trainer':['AI Configuration Trainer','Teach the model unfamiliar vendor syntax'],
+  'page-reports':['Report Generation','Export executive, technical, and compliance reports'],
+  'page-history':['Audit History','Chronological record of scans and changes'],
+  'page-settings':['Settings','Console preferences and integration status'],
+};
+
+function buildSidebar(){
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = NAV.map(sec => `
+    <div class="nav-section-label">${sec.section}</div>
+    ${sec.items.map(it => `
+      <a class="nav-item" data-page="${it.id}" onclick="goTo('${it.id}')">
+        <svg viewBox="0 0 24 24" fill="none">${ICONS[it.icon]}</svg>
+        <span>${it.label}</span>
+        ${it.badge?`<span class="nav-badge">${it.badge}</span>`:''}
+      </a>`).join('')}
+  `).join('');
+}
+
+function goTo(pageId){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===pageId));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id===pageId));
+  const meta = PAGE_META[pageId];
+  document.getElementById('topbar-title').textContent = meta[0];
+  document.getElementById('topbar-sub').textContent = meta[1];
+  window.scrollTo(0,0);
+  // lazy render heavy charts on first view
+  if(pageId==='page-dashboard') renderDashboardCharts();
+  if(pageId==='page-dna') renderDnaChart(currentDnaDevice);
+  if(pageId==='page-twin') renderTwin('app-twin-svg');
+  if(pageId==='page-attackpaths') renderAttackPaths();
+}
+
+function launchApp(target){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').classList.add('active');
+  goTo(target || 'page-dashboard');
+}
+
+/* =========================================================
+   PAGE RENDERERS
+   ========================================================= */
+function sevBadge(sev){
+  const map = {Critical:'b-critical', High:'b-high', Medium:'b-medium', Low:'b-low'};
+  return `<span class="badge ${map[sev]}">${sev.toUpperCase()}</span>`;
+}
+function riskColor(v){ return v>=70?'var(--critical)': v>=45?'var(--warning)': v>=25?'var(--primary)':'var(--success)'; }
+
+/* ---- Dashboard ---- */
+function pageDashboard(){
+  const critical = FINDINGS.filter(f=>f.severity==='Critical').length;
+  const paths = FINDINGS.filter(f=>f.attackPath).length;
+  return `
+  <div class="page-head"><h2>Executive Dashboard</h2><p>Snapshot of posture across all ingested vendor configurations. Demo data.</p></div>
+  <div class="grid g5" style="margin-bottom:16px;">
+    ${statCard('Total Devices','24','icon-devices','var(--primary)','+2 this week','up')}
+    ${statCard('Compliance','78%','icon-check','var(--success)','+1.2% vs last scan','up')}
+    ${statCard('Critical Risks', String(critical).padStart(2,'0'),'icon-alert','var(--critical)','2 new since Aug 28','down')}
+    ${statCard('Attack Paths', String(paths),'icon-path','var(--warning)','1 mitigated this week','up')}
+    ${statCard('Regressions','02','icon-trend','var(--critical)','Aug 28 – Aug 29','down')}
+  </div>
+
+  <div class="grid g2" style="margin-bottom:16px;">
+    <div class="panel">
+      <div class="panel-head"><h3>Security Posture — 7 Day Trend</h3><span class="tag">ORG-WIDE</span></div>
+      <canvas id="chart-posture" height="150"></canvas>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Risk Distribution</h3><span class="tag">BY SEVERITY</span></div>
+      <canvas id="chart-risk-dist" height="150"></canvas>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:16px;">
+    <div class="panel">
+      <div class="panel-head"><h3>Vendor Distribution</h3><span class="tag">24 DEVICES</span></div>
+      <canvas id="chart-vendor" height="150"></canvas>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Framework Compliance</h3><span class="tag">4 FRAMEWORKS</span></div>
+      ${FRAMEWORKS.map(f=>`
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+            <span>${f.name}</span><span class="mono" style="color:var(--muted);">${f.score}%</span>
+          </div>
+          <div class="progress"><div style="width:${f.score}%; background:${f.score>=80?'var(--success)':f.score>=70?'var(--primary)':'var(--warning)'};"></div></div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-head"><h3>Top Attack Paths</h3><span class="tag">RISK ORDERED</span></div>
+      ${FINDINGS.filter(f=>f.attackPath).sort((a,b)=>b.risk-a.risk).slice(0,4).map(f=>`
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:12.8px; font-weight:600;">${f.title}</div>
+            <div style="font-size:11px; color:var(--muted); margin-top:2px;">${f.device} → ${f.asset}</div>
+          </div>
+          <div style="font-size:14px; font-weight:800; font-family:'JetBrains Mono',monospace; color:${riskColor(f.risk)};">${f.risk}</div>
+        </div>`).join('')}
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Top Remediation Opportunities</h3><span class="tag">IMPACT ORDERED</span></div>
+      ${[...FINDINGS].sort((a,b)=>b.impact-a.impact).slice(0,4).map(f=>`
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+            <span>${f.title.length>36?f.title.slice(0,36)+'…':f.title}</span>
+            <span class="mono" style="color:var(--success);">−${f.impact}%</span>
+          </div>
+          <div class="progress"><div style="width:${f.impact*2}%; background:var(--success);"></div></div>
+        </div>`).join('')}
+    </div>
+  </div>
+  `;
+}
+function statCard(label,val,icon,color,delta,dir){
+  return `<div class="panel stat-card">
+    <div class="stat-icon" style="background:${color}22; color:${color};">${statIcon(icon)}</div>
+    <div class="label">${label}</div>
+    <div class="val">${val}</div>
+    <div class="delta ${dir}">${dir==='up'?'▲':'▼'} ${delta}</div>
+  </div>`;
+}
+function statIcon(k){
+  const set={'icon-devices':ICONS.devices,'icon-check':ICONS.compliance,'icon-alert':'<path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>','icon-path':ICONS.path,'icon-trend':'<path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'};
+  return `<svg viewBox="0 0 24 24" fill="none">${set[k]}</svg>`;
+}
+
+let chartsRendered=false;
+function renderDashboardCharts(){
+  if(chartsRendered) return; chartsRendered=true;
+  const fontColor = '#94A3B8';
+  Chart.defaults.color = fontColor;
+  Chart.defaults.borderColor = 'rgba(148,163,184,0.12)';
+  Chart.defaults.font.family = "'Inter',sans-serif";
+
+  new Chart(document.getElementById('chart-posture'), {
+    type:'line',
+    data:{labels:REGRESSION_TIMELINE.map(r=>r.d), datasets:[{data:REGRESSION_TIMELINE.map(r=>r.v), borderColor:'#00E5FF', backgroundColor:'rgba(0,229,255,0.08)', fill:true, tension:0.35, pointRadius:3, pointBackgroundColor:'#00E5FF'}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{min:60,max:100,grid:{color:'rgba(148,163,184,0.08)'}}, x:{grid:{display:false}}}}
+  });
+
+  const sevCounts = {Critical:0,High:0,Medium:0,Low:0};
+  FINDINGS.forEach(f=>sevCounts[f.severity]++);
+  new Chart(document.getElementById('chart-risk-dist'), {
+    type:'doughnut',
+    data:{labels:Object.keys(sevCounts), datasets:[{data:Object.values(sevCounts), backgroundColor:['#EF4444','#F59E0B','#00E5FF','#94A3B8'], borderWidth:0}]},
+    options:{cutout:'68%', plugins:{legend:{position:'bottom', labels:{boxWidth:8, padding:14, font:{size:11}}}}}
+  });
+
+  const vendorCounts = {};
+  DEVICES.forEach(d=>vendorCounts[d.vendor]=(vendorCounts[d.vendor]||0)+1);
+  // scale sample 8 to 24 proportionally for display richness
+  new Chart(document.getElementById('chart-vendor'), {
+    type:'bar',
+    data:{labels:Object.keys(vendorCounts), datasets:[{data:Object.values(vendorCounts).map(v=>v*3), backgroundColor:'#00E5FF', borderRadius:5, maxBarThickness:34}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{grid:{color:'rgba(148,163,184,0.08)'}}, x:{grid:{display:false}}}}
+  });
+}
+
+/* ---- Device Inventory ---- */
+function pageDevices(){
+  return `
+  <div class="page-head"><h2>Device Inventory</h2><p>Sample of 8 profiled devices shown below; organization total is 24.</p></div>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Device</th><th>Vendor</th><th>Type</th><th>OS / Version</th><th>Criticality</th><th>Compliance</th><th>Risk</th></tr></thead>
+      <tbody>
+        ${DEVICES.map(d=>`
+          <tr onclick="alert('Opening ${d.name} detail — vendor: ${d.vendor}, OS: ${d.os}, IP: ${d.ip}. Full device drill-down is part of the Security Digital Twin view.')">
+            <td style="font-weight:600;">${d.name}</td>
+            <td>${d.vendor}</td>
+            <td>${d.type}</td>
+            <td class="mono" style="color:var(--muted);">${d.os}</td>
+            <td>${sevBadge(d.criticality==='Critical'?'Critical':d.criticality==='High'?'High':d.criticality==='Medium'?'Medium':'Low')}</td>
+            <td><div style="display:flex; align-items:center; gap:8px;"><div class="progress" style="width:70px;"><div style="width:${d.compliance}%; background:${d.compliance>=80?'var(--success)':'var(--warning)'};"></div></div><span class="mono" style="font-size:11px;">${d.compliance}%</span></div></td>
+            <td style="font-weight:800; font-family:'JetBrains Mono',monospace; color:${riskColor(d.risk)};">${d.risk}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+/* ---- Upload ---- */
+function pageUpload(){
+  return `
+  <div class="page-head"><h2>Configuration Upload</h2><p>Ingest real configuration files from your device. Supported: Cisco, Fortinet, Palo Alto, Juniper, Generic/unknown. Files are read locally in your browser only.</p></div>
+  <div class="grid g2">
+    <div class="panel" style="border-style:dashed; border-color:var(--border-strong); text-align:center; padding:48px 20px;" id="dropzone" ondragover="event.preventDefault(); this.style.borderColor='var(--primary)';" ondragleave="this.style.borderColor='var(--border-strong)';" ondrop="handleDrop(event)">
+      <svg viewBox="0 0 24 24" fill="none" style="width:34px;height:34px; margin:0 auto 14px; color:var(--primary);">${ICONS.upload}</svg>
+      <div style="font-weight:700; margin-bottom:6px;">Drag &amp; drop configuration files</div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:18px;">.txt / .cfg / .conf — multiple files supported</div>
+      <input type="file" id="file-input" multiple accept=".txt,.cfg,.conf,.log" style="display:none;" onchange="handleFiles(this.files)">
+      <button class="btn solid" onclick="document.getElementById('file-input').click()">Browse Files</button>
+      <div id="upload-list" style="margin-top:20px; text-align:left;"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Live Configuration Scan</h3><span class="tag">HEURISTIC · DEMO ENGINE</span></div>
+      <div id="scan-results" style="font-size:12.5px; color:var(--muted);">Upload a file to run the vendor-detection and known-risk-pattern scan against its real contents.</div>
+    </div>
+  </div>`;
+}
+
+const RISK_PATTERNS = [
+  {re:/transport input telnet/i, label:'Telnet management enabled', sev:'Critical'},
+  {re:/community\s+public/i, label:'SNMP default community string ("public")', sev:'High'},
+  {re:/srcaddr\s+"?all"?/i, label:'Firewall rule with unrestricted source address', sev:'Critical'},
+  {re:/timeout\s+0/i, label:'Session/idle timeout disabled', sev:'Medium'},
+  {re:/tls1[-_.]?0|sslv[23]/i, label:'Outdated TLS/SSL version permitted', sev:'Low'},
+  {re:/password\s+7\s/i, label:'Weak/reversible password encryption type', sev:'High'},
+  {re:/no\s+service\s+password-encryption/i, label:'Password encryption disabled', sev:'High'},
+  {re:/permit\s+ip\s+any\s+any/i, label:'Overly permissive ACL (any/any)', sev:'Critical'},
+  {re:/http\s+enable|allowaccess[^\\n]*http[^s]/i, label:'Unencrypted HTTP management service exposed', sev:'High'},
+  {re:/logtraffic\s+disable|no\s+logging/i, label:'Traffic logging disabled', sev:'Medium'},
+];
+const VENDOR_SIGNATURES = [
+  {re:/config firewall|fortios|fortinet/i, vendor:'Fortinet'},
+  {re:/set mgt-config|panorama|pan-os/i, vendor:'Palo Alto'},
+  {re:/ios[\s-]xe|interface GigabitEthernet|line vty/i, vendor:'Cisco'},
+  {re:/junos|set interfaces|set security/i, vendor:'Juniper'},
+];
+
+let uploadedFiles = [];
+function handleFiles(fileList){
+  const files = Array.from(fileList);
+  uploadedFiles = uploadedFiles.concat(files);
+  renderUploadList();
+  files.forEach(f=>{
+    const reader = new FileReader();
+    reader.onload = (e)=> analyzeFileContent(f.name, e.target.result);
+    reader.readAsText(f);
+  });
+}
+function renderUploadList(){
+  const list = document.getElementById('upload-list');
+  if(!list) return;
+  list.innerHTML = uploadedFiles.map(f=>`
+    <div style="display:flex; align-items:center; gap:8px; font-size:12px; padding:7px 10px; background:rgba(0,229,255,0.05); border:1px solid var(--border); border-radius:7px; margin-bottom:6px;">
+      <span style="color:var(--success);">●</span> <span class="mono">${f.name}</span>
+      <span style="margin-left:auto; color:var(--muted);">${(f.size/1024).toFixed(1)} KB</span>
+    </div>`).join('');
+}
+function analyzeFileContent(filename, text){
+  const lines = text.split(/\r?\n/).filter(l=>l.trim().length);
+  let vendor = 'Unknown / Generic';
+  for(const v of VENDOR_SIGNATURES){ if(v.re.test(text)){ vendor = v.vendor; break; } }
+  const hits = RISK_PATTERNS.filter(p=>p.re.test(text));
+  const resultsEl = document.getElementById('scan-results');
+  if(!resultsEl) return;
+  const sevBadgeLocal = (s)=> `<span class="badge ${s==='Critical'?'b-critical':s==='High'?'b-high':s==='Medium'?'b-medium':'b-low'}">${s.toUpperCase()}</span>`;
+  const block = `
+    <div style="border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div class="mono" style="font-size:12.5px; color:var(--text); font-weight:600;">${filename}</div>
+        <span class="badge b-medium">${vendor.toUpperCase()}</span>
+      </div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">${lines.length} non-empty lines scanned against ${RISK_PATTERNS.length} known risk patterns</div>
+      ${hits.length ? hits.map(h=>`<div style="display:flex; justify-content:space-between; padding:6px 0; font-size:12.3px;"><span>${h.label}</span>${sevBadgeLocal(h.sev)}</div>`).join('') : '<div style="font-size:12px; color:var(--success);">No known risk patterns matched in this demo pattern set.</div>'}
+    </div>`;
+  const existingBtn = resultsEl.querySelector('.begin-norm-btn');
+  if(existingBtn) existingBtn.remove();
+  if(resultsEl.dataset.hasContent){ resultsEl.innerHTML += block; } else { resultsEl.innerHTML = block; resultsEl.dataset.hasContent = '1'; }
+  resultsEl.insertAdjacentHTML('beforeend', `<button class="btn solid begin-norm-btn" style="width:100%;" onclick="goTo('page-analysis')">Begin Normalization →</button>`);
+}
+function handleDrop(e){
+  e.preventDefault();
+  e.currentTarget.style.borderColor='var(--border-strong)';
+  if(e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+}
+
+/* ---- Analysis Pipeline ---- */
+function pageAnalysis(){
+  return `
+  <div class="page-head"><h2>Configuration Analysis</h2><p>Deterministic rules issue the final compliance verdict; AI assists with unfamiliar syntax and explanation.</p></div>
+  <div class="panel" style="margin-bottom:16px;">
+    <div class="panel-head"><h3>Normalization Pipeline</h3><span class="tag">FORTINET-FW-01.CONF</span></div>
+    <div class="flow-step">
+      <div class="flow-node live"><div class="t">Raw Configuration</div><div class="s">1,204 lines</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node live"><div class="t">Vendor Detection</div><div class="s">FortiOS 7.2 (98% confidence)</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">AI-Assisted Parsing</div><div class="s">semantic interpretation</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Normalization</div><div class="s">vendor-neutral mapping</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="t">Universal Security Model</div><div class="s">14 concepts extracted</div></div>
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-head"><h3>Extracted Concepts</h3></div>
+      ${['Management protocol','Authentication','Encryption','ACL','Firewall rule','Exposed service','Logging','Monitoring','Segmentation','Routing','Administrative access','Password policy','Session timeout'].map((c,i)=>`
+        <div style="display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); font-size:12.8px;">
+          <span>${c}</span><span class="badge ${i%4===0?'b-critical':i%3===0?'b-high':'b-success'}">${i%4===0?'FLAGGED':i%3===0?'REVIEW':'MAPPED'}</span>
+        </div>`).join('')}
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Raw Snippet → Universal Model</h3></div>
+      <div class="code-line diff-ctx" style="margin-bottom:2px;">config firewall policy</div>
+      <div class="code-line diff-ctx" style="margin-bottom:2px;">  set srcintf "wan1"</div>
+      <div class="code-line diff-ctx" style="margin-bottom:10px;">  set action accept</div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:8px; letter-spacing:0.3px;">MAPS TO</div>
+      <div class="mono" style="font-size:12px; background:rgba(0,229,255,0.06); border:1px solid rgba(0,229,255,0.25); border-radius:8px; padding:12px;">
+        concept: <span style="color:var(--primary);">firewall_rule</span><br>
+        direction: <span style="color:var(--primary);">inbound</span><br>
+        scope: <span style="color:var(--warning);">unrestricted</span><br>
+        verdict: <span style="color:var(--critical);">non_compliant</span>
+      </div>
+      <button class="btn solid" style="margin-top:16px; width:100%;" onclick="goTo('page-compliance')">Run Compliance Scan →</button>
+    </div>
+  </div>`;
+}
+
+/* ---- Digital Twin (shared render for hero + app) ---- */
+const TWIN_NODES = [
+  {id:'internet', label:'Internet', x:240, y:40, risk:'low'},
+  {id:'fw', label:'Firewall', x:240, y:150, risk:'critical'},
+  {id:'web', label:'Web Server', x:120, y:260, risk:'high'},
+  {id:'router', label:'Core Router', x:360, y:260, risk:'high'},
+  {id:'app', label:'App Server', x:240, y:360, risk:'medium'},
+  {id:'db', label:'Database', x:240, y:460, risk:'critical'},
+];
+const TWIN_EDGES = [['internet','fw'],['fw','web'],['fw','router'],['web','app'],['router','app'],['app','db']];
+const RISK_COLOR = {critical:'#EF4444', high:'#F59E0B', medium:'#00E5FF', low:'#22C55E'};
+
+function renderTwin(svgId){
+  const svg = document.getElementById(svgId);
+  if(!svg) return;
+  let edges = TWIN_EDGES.map(([a,b])=>{
+    const n1=TWIN_NODES.find(n=>n.id===a), n2=TWIN_NODES.find(n=>n.id===b);
+    return `<line x1="${n1.x}" y1="${n1.y}" x2="${n2.x}" y2="${n2.y}" stroke="rgba(148,163,184,0.35)" stroke-width="1.6"/>`;
+  }).join('');
+  let nodes = TWIN_NODES.map(n=>{
+    const c = RISK_COLOR[n.risk];
+    return `<g class="twin-node" style="cursor:pointer;" onclick="showTwinNode('${n.id}')">
+      <circle cx="${n.x}" cy="${n.y}" r="26" fill="${c}22" stroke="${c}" stroke-width="1.6" class="pulse"/>
+      <circle cx="${n.x}" cy="${n.y}" r="5" fill="${c}"/>
+      <text x="${n.x}" y="${n.y+42}" fill="#E5E7EB" font-size="11" text-anchor="middle" font-family="Inter">${n.label}</text>
+    </g>`;
+  }).join('');
+  svg.innerHTML = edges + nodes;
+}
+function showTwinNode(id){
+  const n = TWIN_NODES.find(x=>x.id===id);
+  const dev = DEVICES.find(d=>d.name.toLowerCase().includes(n.label.split(' ')[0].toLowerCase())) || null;
+  const findings = FINDINGS.filter(f=> f.asset.toLowerCase().includes(n.label.toLowerCase()) || (n.id==='fw' && f.device.includes('FW')));
+  document.getElementById('finding-modal-body').innerHTML = `
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+      <div style="width:34px;height:34px;border-radius:8px;background:${RISK_COLOR[n.risk]}22; display:flex; align-items:center; justify-content:center;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:17px;height:17px; color:${RISK_COLOR[n.risk]};">${ICONS.twin}</svg>
+      </div>
+      <div><div style="font-weight:800; font-size:15px;">${n.label}</div><div style="font-size:11.5px; color:var(--muted);">Digital twin node · visual model only</div></div>
+    </div>
+    <div class="grid g2" style="margin-bottom:16px;">
+      <div class="panel" style="padding:12px;"><div style="font-size:11px; color:var(--muted);">Risk posture</div><div style="font-size:20px; font-weight:800; font-family:'JetBrains Mono',monospace; color:${RISK_COLOR[n.risk]};">${n.risk.toUpperCase()}</div></div>
+      <div class="panel" style="padding:12px;"><div style="font-size:11px; color:var(--muted);">Attack-path involvement</div><div style="font-size:20px; font-weight:800;">${findings.some(f=>f.attackPath)?'YES':'—'}</div></div>
+    </div>
+    <div style="font-size:12.5px; font-weight:700; margin-bottom:8px;">Related findings</div>
+    ${findings.length? findings.map(f=>`<div style="padding:8px 0; border-bottom:1px solid var(--border); font-size:12.5px; display:flex; justify-content:space-between;"><span>${f.title}</span>${sevBadge(f.severity)}</div>`).join('') : '<div style="font-size:12.5px; color:var(--muted);">No findings directly mapped to this node in the demo dataset.</div>'}
+  `;
+  openModal('finding-modal');
+}
+
+function pageTwin(){
+  return `
+  <div class="page-head"><h2>Security Digital Twin</h2><p>Visual model constructed from normalized configurations. Click a node for detail. This model never modifies production devices.</p></div>
+  <div class="panel" style="height:560px; position:relative;">
+    <div style="position:absolute; top:16px; left:18px; font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace;">MODEL STATUS: <span style="color:var(--success);">SYNCED</span> · READ-ONLY</div>
+    <svg id="app-twin-svg" viewBox="0 0 480 500" style="width:100%; height:100%;"></svg>
+  </div>`;
+}
+
+/* ---- Attack Paths ---- */
+const ATTACK_PATHS = [
+  {id:'AP-01', name:'WAN → Firewall → Web Tier → Database', entry:'Internet-facing WAN interface', devices:['Fortinet-FW-01','App Server','Production Database'], weakness:'Overly permissive inbound rule (F-1027)', risk:91, mitre:'T1190 — Exploit Public-Facing Application', mitigation:'Restrict WAN ingress to approved source ranges and scoped destination services.'},
+  {id:'AP-02', name:'DMZ → Internal VLAN → Database', entry:'DMZ management interface', devices:['Fortinet-FW-01','Internal VLAN','Production Database'], weakness:'Segmentation gap between DMZ and internal VLAN (F-1115)', risk:79, mitre:'T1210 — Exploitation of Remote Services', mitigation:'Insert an explicit deny ACL between DMZ and internal management ranges.'},
+  {id:'AP-03', name:'Management VLAN → Router → Core Network', entry:'Telnet on Cisco-Router-01', devices:['Cisco-Router-01','Core Network'], weakness:'Clear-text Telnet management access (F-1041)', risk:87, mitre:'T1557 — Adversary-in-the-Middle', mitigation:'Disable Telnet; enforce SSHv2 with key-based authentication.'},
+  {id:'AP-04', name:'SNMP → Switch → Distribution Layer', entry:'SNMPv1 on Cisco-Switch-02', devices:['Cisco-Switch-02','Distribution Layer'], weakness:'SNMPv1 default community string (F-1094)', risk:61, mitre:'T1590 — Gather Victim Network Information', mitigation:'Migrate to SNMPv3 with authPriv and rotate credentials.'},
+];
+function renderAttackPaths(){
+  const wrap = document.getElementById('attackpath-list');
+  if(!wrap) return;
+  wrap.innerHTML = ATTACK_PATHS.map(p=>`
+    <div class="panel" style="margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+        <div>
+          <div style="font-size:10.5px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:4px;">${p.id} · POTENTIAL ATTACK PATH</div>
+          <div style="font-weight:700; font-size:14px;">${p.name}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:22px; font-weight:800; font-family:'JetBrains Mono',monospace; color:${riskColor(p.risk)};">${p.risk}</div>
+          <div style="font-size:10px; color:var(--muted);">RISK SCORE</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+        ${p.devices.map((d,i)=>`<span class="chip">${d}</span>${i<p.devices.length-1?'<span style="color:var(--muted);">→</span>':''}`).join('')}
+      </div>
+      <div class="grid g2" style="margin-bottom:10px;">
+        <div><div style="font-size:10.5px; color:var(--muted); margin-bottom:4px;">ENTRY POINT</div><div style="font-size:12.5px;">${p.entry}</div></div>
+        <div><div style="font-size:10.5px; color:var(--muted); margin-bottom:4px;">MITRE ATT&amp;CK</div><div style="font-size:12.5px;" class="mono">${p.mitre}</div></div>
+      </div>
+      <div style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
+        <div style="font-size:10.5px; color:var(--critical); margin-bottom:3px; font-weight:700;">WEAKNESS ENABLING THIS PATH</div>
+        <div style="font-size:12.5px;">${p.weakness}</div>
+      </div>
+      <div style="background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.2); border-radius:8px; padding:10px 12px;">
+        <div style="font-size:10.5px; color:var(--success); margin-bottom:3px; font-weight:700;">RECOMMENDED MITIGATION</div>
+        <div style="font-size:12.5px;">${p.mitigation}</div>
+      </div>
+    </div>
+  `).join('');
+}
+function pageAttackPaths(){
+  return `
+  <div class="page-head"><h2>Attack-Path Intelligence</h2><p>Potential paths identified from the normalized security model. Defensive analysis — no exploitation is performed.</p></div>
+  <div id="attackpath-list"></div>`;
+}
+
+/* ---- Security DNA ---- */
+let currentDnaDevice = 'd3';
+let dnaChart = null;
+function pageDna(){
+  return `
+  <div class="page-head"><h2>Security DNA</h2><p>Six-dimension security profile per device, rolled up to network and organization level.</p></div>
+  <div class="grid" style="grid-template-columns:220px 1fr; gap:16px;">
+    <div class="panel">
+      <div class="panel-head"><h3>Devices</h3></div>
+      ${DEVICES.map(d=>`<div class="nav-item ${d.id===currentDnaDevice?'active':''}" style="margin-bottom:2px;" onclick="selectDnaDevice('${d.id}')"><span style="font-size:12.5px;">${d.name}</span></div>`).join('')}
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-head"><h3 id="dna-device-title">Fortinet-FW-01</h3><span class="tag">DEVICE SECURITY DNA</span></div>
+        <canvas id="dna-radar" height="220"></canvas>
+      </div>
+      <div class="grid g3">
+        <div class="panel" style="text-align:center;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px;">DEVICE DNA</div><div style="font-size:26px; font-weight:800; font-family:'JetBrains Mono',monospace;" id="dna-device-score">64%</div></div>
+        <div class="panel" style="text-align:center;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px;">NETWORK DNA</div><div style="font-size:26px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--primary);">73%</div></div>
+        <div class="panel" style="text-align:center;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px;">ORGANIZATION DNA</div><div style="font-size:26px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--success);">78%</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+function selectDnaDevice(id){
+  currentDnaDevice = id;
+  goTo('page-dna');
+  document.getElementById('pages').querySelector('#page-dna').innerHTML = pageDna();
+  renderDnaChart(id);
+}
+function renderDnaChart(deviceId){
+  const dev = DEVICES.find(d=>d.id===deviceId);
+  const data = DNA_DATA[deviceId];
+  const titleEl = document.getElementById('dna-device-title');
+  const scoreEl = document.getElementById('dna-device-score');
+  if(titleEl) titleEl.textContent = dev.name;
+  if(scoreEl) scoreEl.textContent = dev.compliance + '%';
+  const ctx = document.getElementById('dna-radar');
+  if(!ctx) return;
+  if(dnaChart) dnaChart.destroy();
+  dnaChart = new Chart(ctx, {
+    type:'radar',
+    data:{labels:DNA_DIMENSIONS, datasets:[{label:dev.name, data, backgroundColor:'rgba(0,229,255,0.14)', borderColor:'#00E5FF', pointBackgroundColor:'#00E5FF', borderWidth:2}]},
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{r:{min:0,max:100, angleLines:{color:'rgba(148,163,184,0.14)'}, grid:{color:'rgba(148,163,184,0.14)'}, pointLabels:{color:'#E5E7EB', font:{size:11.5}}, ticks:{display:false}}}
+    }
+  });
+}
+
+/* ---- Compliance Center ---- */
+let activeFramework = 'cis';
+function pageCompliance(){
+  return `
+  <div class="page-head"><h2>Compliance Center</h2><p>Framework-mapped findings with evidence. Demo control mappings — not official control text.</p></div>
+  <div class="grid g4" style="margin-bottom:16px;">
+    ${FRAMEWORKS.map(f=>`
+      <div class="panel" style="text-align:center; cursor:pointer; ${f.id===activeFramework?'border-color:var(--primary);':''}" onclick="setFramework('${f.id}')">
+        <div style="font-size:11.5px; color:var(--muted); margin-bottom:8px;">${f.name}</div>
+        <div style="font-size:26px; font-weight:800; font-family:'JetBrains Mono',monospace; color:${f.score>=80?'var(--success)':f.score>=70?'var(--primary)':'var(--warning)'};">${f.score}%</div>
+      </div>`).join('')}
+  </div>
+  <div class="panel">
+    <div class="panel-head"><h3>Findings — <span id="fw-label" style="color:var(--primary);">CIS</span></h3><span class="tag" id="fw-count">— items</span></div>
+    <table>
+      <thead><tr><th>Control</th><th>Finding</th><th>Device</th><th>Severity</th><th>Status</th></tr></thead>
+      <tbody id="compliance-tbody"></tbody>
+    </table>
+  </div>`;
+}
+function setFramework(id){
+  activeFramework = id;
+  document.getElementById('pages').querySelector('#page-compliance').innerHTML = pageCompliance();
+  renderComplianceTable();
+}
+function renderComplianceTable(){
+  const map = {cis:'CIS', nist:'NIST', stig:'STIG', iso:'ISO'};
+  const label = map[activeFramework];
+  const rows = FINDINGS.filter(f=>f.framework.toUpperCase().includes(label));
+  const lbl = document.getElementById('fw-label'); if(lbl) lbl.textContent = FRAMEWORKS.find(f=>f.id===activeFramework).name;
+  const cnt = document.getElementById('fw-count'); if(cnt) cnt.textContent = rows.length + ' items';
+  const tbody = document.getElementById('compliance-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = rows.map(f=>`
+    <tr onclick="openFinding('${f.id}')">
+      <td class="mono" style="color:var(--primary);">${f.framework}</td>
+      <td>${f.title}</td>
+      <td>${f.device}</td>
+      <td>${sevBadge(f.severity)}</td>
+      <td><span class="badge b-critical">NON-COMPLIANT</span></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="color:var(--muted); text-align:center; padding:24px;">No findings mapped to this framework in the demo dataset.</td></tr>';
+}
+
+/* ---- Findings ---- */
+function pageFindings(){
+  return `
+  <div class="page-head"><h2>Findings</h2><p>All detected compliance and security findings across ingested devices.</p></div>
+  <div class="panel">
+    <table>
+      <thead><tr><th>ID</th><th>Finding</th><th>Device</th><th>Severity</th><th>Attack Path</th><th>Risk</th></tr></thead>
+      <tbody>
+        ${FINDINGS.map(f=>`
+          <tr onclick="openFinding('${f.id}')">
+            <td class="mono" style="color:var(--muted);">${f.id}</td>
+            <td>${f.title}</td>
+            <td>${f.device}</td>
+            <td>${sevBadge(f.severity)}</td>
+            <td>${f.attackPath?'<span class="badge b-critical">YES</span>':'<span class="badge b-low">NO</span>'}</td>
+            <td style="font-weight:800; font-family:'JetBrains Mono',monospace; color:${riskColor(f.risk)};">${f.risk}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+function openFinding(id){
+  const f = FINDINGS.find(x=>x.id===id);
+  document.getElementById('finding-modal-body').innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+      <div>
+        <div style="font-size:10.5px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:6px;">${f.id}</div>
+        <div style="font-size:16px; font-weight:800; max-width:440px;">${f.title}</div>
+      </div>
+      ${sevBadge(f.severity)}
+    </div>
+    <div class="grid g2" style="margin-bottom:14px;">
+      <div class="panel" style="padding:10px 12px;"><div style="font-size:10.5px; color:var(--muted);">DEVICE</div><div style="font-size:13px; font-weight:600;">${f.device}</div></div>
+      <div class="panel" style="padding:10px 12px;"><div style="font-size:10.5px; color:var(--muted);">VENDOR</div><div style="font-size:13px; font-weight:600;">${f.vendor}</div></div>
+      <div class="panel" style="padding:10px 12px;"><div style="font-size:10.5px; color:var(--muted);">CONTROL</div><div style="font-size:13px; font-weight:600;">${f.framework}</div></div>
+      <div class="panel" style="padding:10px 12px;"><div style="font-size:10.5px; color:var(--muted);">AFFECTED ASSET</div><div style="font-size:13px; font-weight:600;">${f.asset}</div></div>
+    </div>
+    <div style="font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:700;">CONFIGURATION EVIDENCE</div>
+    <div class="mono" style="font-size:11.5px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:12px; white-space:pre-wrap; margin-bottom:14px;">${f.evidence}</div>
+    <div style="font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:700;">WHY IT MATTERS</div>
+    <div style="font-size:13px; margin-bottom:14px; line-height:1.55;">${f.why}</div>
+    <div style="background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.2); border-radius:8px; padding:12px; margin-bottom:14px;">
+      <div style="font-size:10.5px; color:var(--success); font-weight:700; margin-bottom:4px;">RECOMMENDED REMEDIATION — verify before production deployment</div>
+      <div style="font-size:13px;">${f.fix}</div>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div><div style="font-size:10.5px; color:var(--muted);">RISK SCORE</div><div style="font-size:22px; font-weight:800; font-family:'JetBrains Mono',monospace; color:${riskColor(f.risk)};">${f.risk}</div></div>
+      <div><div style="font-size:10.5px; color:var(--muted);">EST. IMPACT IF FIXED</div><div style="font-size:22px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--success);">−${f.impact}%</div></div>
+      <button class="btn solid" onclick="closeModal('finding-modal'); goTo('page-simulator');">Simulate Fix →</button>
+    </div>
+  `;
+  openModal('finding-modal');
+}
+
+/* ---- Risk Prioritization ---- */
+function pagePriority(){
+  const ranked = [...FINDINGS].sort((a,b)=>b.risk-a.risk);
+  const tiers = {Critical:[], High:[], Medium:[], Low:[]};
+  ranked.forEach(f=>tiers[f.severity].push(f));
+  return `
+  <div class="page-head"><h2>Risk Prioritization Engine</h2><p>Score combines severity, asset criticality, exposure, attack-path involvement, and confidence.</p></div>
+  ${Object.entries(tiers).map(([tier, list])=> list.length? `
+    <div style="margin-bottom:20px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        ${sevBadge(tier)} <span style="font-size:12px; color:var(--muted);">${list.length} finding${list.length>1?'s':''}</span>
+      </div>
+      ${list.map(f=>`
+        <div class="panel" style="margin-bottom:10px; display:flex; align-items:center; gap:16px; cursor:pointer;" onclick="openFinding('${f.id}')">
+          <div style="font-size:22px; font-weight:800; font-family:'JetBrains Mono',monospace; color:${riskColor(f.risk)}; width:48px;">${f.risk}</div>
+          <div style="flex:1;">
+            <div style="font-weight:600; font-size:13px;">${f.title}</div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:3px;">${f.device} · Asset: ${f.asset} ${f.attackPath?'· <span style="color:var(--critical);">on attack path</span>':''}</div>
+          </div>
+          <div class="badge ${tier==='Critical'?'b-critical':tier==='High'?'b-high':tier==='Medium'?'b-medium':'b-low'}">${tier.toUpperCase()}</div>
+        </div>`).join('')}
+    </div>` : '').join('')}
+  `;
+}
+
+/* ---- Remediation Center ---- */
+function pageRemediation(){
+  const ranked = [...FINDINGS].sort((a,b)=>b.impact-a.impact);
+  return `
+  <div class="page-head"><h2>Remediation Impact Ranking</h2><p>Which single remediation provides the greatest estimated risk reduction.</p></div>
+  <div class="panel">
+    ${ranked.map((f,i)=>`
+      <div style="display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid var(--border);">
+        <div style="width:26px; height:26px; border-radius:7px; background:${i===0?'rgba(0,229,255,0.14)':'rgba(255,255,255,0.04)'}; color:${i===0?'var(--primary)':'var(--muted)'}; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0;">${i+1}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px; font-weight:600; margin-bottom:6px;">${f.title}</div>
+          <div class="progress"><div style="width:${f.impact*2}%; background:${i===0?'var(--primary)':'var(--success)'};"></div></div>
+        </div>
+        <div style="width:70px; text-align:right; font-family:'JetBrains Mono',monospace; font-weight:800; color:${i===0?'var(--primary)':'var(--success)'};">−${f.impact}%</div>
+        <button class="btn sm" onclick="openFinding('${f.id}')">Details</button>
+      </div>`).join('')}
+  </div>`;
+}
+
+/* ---- What-if Simulator ---- */
+let simSelected = new Set();
+function pageSimulator(){
+  const baseRisk = 82, basePaths = 4;
+  return `
+  <div class="page-head"><h2>What-if Security Simulator</h2><p>Model post-remediation posture before applying any change. Simulation only — never applied to production.</p></div>
+  <div class="grid" style="grid-template-columns:1fr 320px; gap:16px;">
+    <div class="panel">
+      <div class="panel-head"><h3>Select Remediations to Simulate</h3><span class="tag">${simSelected.size} selected</span></div>
+      ${FINDINGS.slice(0,6).map(f=>`
+        <label style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--border); cursor:pointer;">
+          <input type="checkbox" ${simSelected.has(f.id)?'checked':''} onchange="toggleSim('${f.id}')" style="width:16px; height:16px; accent-color:#00E5FF;">
+          <div style="flex:1;">
+            <div style="font-size:12.8px; font-weight:600;">${f.title}</div>
+            <div style="font-size:11px; color:var(--muted);">${f.device}</div>
+          </div>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--success);">−${f.impact}%</span>
+        </label>`).join('')}
+      <button class="btn solid" style="width:100%; margin-top:16px;" onclick="runSimulation()">▶ SIMULATE</button>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:16px;">
+        <div style="font-size:11px; color:var(--muted); text-align:center; margin-bottom:10px;">BEFORE</div>
+        <div style="text-align:center; font-size:34px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--critical);">${baseRisk}</div>
+        <div style="text-align:center; font-size:11px; color:var(--muted); margin-bottom:14px;">RISK SCORE</div>
+        <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:var(--muted);">Attack Paths</span><span class="mono">${basePaths}</span></div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:6px;"><span style="color:var(--muted);">Critical Exposure</span><span style="color:var(--critical); font-weight:700;">HIGH</span></div>
+      </div>
+      <div class="panel" id="sim-after">
+        <div style="font-size:11px; color:var(--muted); text-align:center; margin-bottom:10px;">AFTER SIMULATION</div>
+        <div style="text-align:center; font-size:34px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--muted);" id="sim-after-score">—</div>
+        <div style="text-align:center; font-size:11px; color:var(--muted); margin-bottom:14px;">Run a simulation</div>
+        <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:var(--muted);">Attack Paths</span><span class="mono" id="sim-after-paths">—</span></div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:6px;"><span style="color:var(--muted);">Critical Exposure</span><span id="sim-after-exposure" style="font-weight:700; color:var(--muted);">—</span></div>
+      </div>
+    </div>
+  </div>
+  <div id="sim-banner" style="display:none; margin-top:16px; text-align:center; font-size:11px; letter-spacing:0.4px; color:var(--warning); font-family:'JetBrains Mono',monospace; border:1px solid rgba(245,158,11,0.3); background:rgba(245,158,11,0.06); padding:10px; border-radius:8px;">
+    SIMULATED RESULT — NOT APPLIED TO PRODUCTION
+  </div>
+  `;
+}
+function toggleSim(id){ simSelected.has(id)? simSelected.delete(id) : simSelected.add(id); document.getElementById('pages').querySelector('#page-simulator').innerHTML = pageSimulator(); }
+function runSimulation(){
+  const baseRisk = 82, basePaths = 4;
+  let reduction = 0;
+  simSelected.forEach(id=>{ const f = FINDINGS.find(x=>x.id===id); if(f) reduction += f.impact; });
+  reduction = Math.min(reduction, 78);
+  const after = Math.max(6, Math.round(baseRisk * (1 - reduction/100)));
+  const afterPaths = Math.max(0, basePaths - Math.round(simSelected.size*0.9));
+  const exposure = after>=60?'HIGH':after>=30?'MEDIUM':'LOW';
+  const expColor = after>=60?'var(--critical)':after>=30?'var(--warning)':'var(--success)';
+  document.getElementById('sim-after-score').textContent = simSelected.size? after : '—';
+  document.getElementById('sim-after-score').style.color = simSelected.size? (after>=60?'var(--critical)':after>=30?'var(--warning)':'var(--success)') : 'var(--muted)';
+  document.getElementById('sim-after').querySelector('div:nth-child(2) + div').textContent = simSelected.size? 'RISK SCORE' : 'Run a simulation';
+  document.getElementById('sim-after-paths').textContent = simSelected.size? afterPaths : '—';
+  document.getElementById('sim-after-exposure').textContent = simSelected.size? exposure : '—';
+  document.getElementById('sim-after-exposure').style.color = simSelected.size? expColor : 'var(--muted)';
+  document.getElementById('sim-banner').style.display = simSelected.size? 'block' : 'none';
+}
+
+/* ---- Configuration Diff ---- */
+function pageDiff(){
+  return `
+  <div class="page-head"><h2>Configuration Diff Intelligence</h2><p>Comparing Fortinet-FW-01 configuration: Aug 28 baseline vs Aug 29 deployed change.</p></div>
+  <div class="grid g2" style="margin-bottom:16px;">
+    <div class="panel" style="text-align:center;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px;">SECURITY SCORE BEFORE</div><div style="font-size:30px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--success);">87</div></div>
+    <div class="panel" style="text-align:center;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px;">SECURITY SCORE AFTER</div><div style="font-size:30px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--critical);">68</div></div>
+  </div>
+  <div style="text-align:center; margin-bottom:16px; font-size:12.5px; color:var(--critical); font-weight:600;">
+    ▼ Security regression: −19 — configuration change increased estimated security exposure.
+  </div>
+  <div class="panel">
+    <div class="panel-head"><h3>Diff — config firewall policy edit 27</h3><span class="tag">2 CHANGES</span></div>
+    <div class="code-line diff-ctx">config firewall policy</div>
+    <div class="code-line diff-ctx">  edit 27</div>
+    <div class="code-line diff-del">-   set srcaddr "corp-mgmt-subnet"</div>
+    <div class="code-line diff-add">+   set srcaddr "all"</div>
+    <div class="code-line diff-ctx">    set dstaddr "internal-web"</div>
+    <div class="code-line diff-del">-   set logtraffic all</div>
+    <div class="code-line diff-add">+   set logtraffic disable</div>
+    <div class="code-line diff-ctx">    set action accept</div>
+    <div class="code-line diff-ctx">next</div>
+  </div>
+  <div class="grid g2" style="margin-top:16px;">
+    <div class="panel">
+      <div class="panel-head"><h3>Changes Detected</h3></div>
+      <div style="font-size:12.5px; line-height:2;">
+        <div>ACL source scope <span style="color:var(--critical);">widened</span> — corp-mgmt-subnet → all</div>
+        <div>Traffic logging <span style="color:var(--critical);">disabled</span> on this rule</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Impact</h3></div>
+      <div style="font-size:12.5px; line-height:1.8;">This change removes source restriction on an inbound rule reaching the internal web tier, and simultaneously disables visibility into traffic matching that rule — compounding exposure with reduced detection.</div>
+    </div>
+  </div>`;
+}
+
+/* ---- AI Trainer ---- */
+function pageTrainer(){
+  return `
+  <div class="page-head"><h2>AI Configuration Trainer</h2><p>Unfamiliar syntax is flagged rather than confidently guessed. Accepted mappings expand the vendor-neutral knowledge base.</p></div>
+  <div class="grid g3" style="margin-bottom:16px;">
+    <div class="panel" style="text-align:center;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px;">LEARNED MAPPINGS</div><div style="font-size:26px; font-weight:800; font-family:'JetBrains Mono',monospace;" id="stat-learned">${learnedMappings}</div></div>
+    <div class="panel" style="text-align:center;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px;">VENDOR PATTERNS</div><div style="font-size:26px; font-weight:800; font-family:'JetBrains Mono',monospace;" id="stat-patterns">${vendorPatterns}</div></div>
+    <div class="panel" style="text-align:center;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px;">AVG CONFIDENCE</div><div style="font-size:26px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--success);">94%</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><h3>Unknown Configuration Queue</h3><span class="tag">Generic-EdgeAppliance-04</span></div>
+    <div id="trainer-queue"></div>
+  </div>`;
+}
+function renderTrainerQueue(){
+  const wrap = document.getElementById('trainer-queue');
+  if(!wrap) return;
+  wrap.innerHTML = UNKNOWN_CONFIGS.map((u,i)=>`
+    <div class="panel" id="unk-${i}" style="margin-bottom:12px; background:rgba(255,255,255,0.02);">
+      <div style="font-size:10.5px; color:var(--warning); font-weight:700; margin-bottom:8px;">UNKNOWN CONFIGURATION</div>
+      <div class="mono" style="font-size:12.5px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:6px; padding:9px 12px; margin-bottom:10px;">${u.cmd}</div>
+      <div style="font-size:10.5px; color:var(--muted); margin-bottom:4px;">AI INTERPRETATION</div>
+      <div style="font-size:13px; margin-bottom:10px;">${u.guess}</div>
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-size:11.5px; color:var(--muted);">Confidence: <span style="color:var(--primary); font-weight:700;">${u.conf}%</span></div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn sm solid" onclick="acceptMapping(${i})">Accept Mapping</button>
+          <button class="btn sm">Edit</button>
+          <button class="btn sm danger">Reject</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function acceptMapping(i){
+  const el = document.getElementById('unk-'+i);
+  if(!el || el.dataset.done) return;
+  el.dataset.done='1';
+  el.style.borderColor='var(--success)';
+  el.querySelector('div:last-child').innerHTML = '<span class="badge b-success">MAPPING ACCEPTED</span>';
+  learnedMappings++;
+  vendorPatterns = vendorPatterns + (i%2===0?1:0);
+  document.getElementById('stat-learned').textContent = learnedMappings;
+  document.getElementById('stat-patterns').textContent = vendorPatterns;
+}
+
+/* ---- Reports ---- */
+let selectedReport = 'executive';
+function pageReports(){
+  const types = [
+    {id:'executive', label:'Executive Report', desc:'High-level posture summary for leadership.'},
+    {id:'technical', label:'Technical Audit', desc:'Full evidence-backed finding detail.'},
+    {id:'compliance', label:'Compliance Report', desc:'Framework-by-framework scoring.'},
+    {id:'device', label:'Device Report', desc:'Per-device risk and configuration state.'},
+    {id:'remediation', label:'Remediation Report', desc:'Prioritized fix list with impact.'},
+  ];
+  return `
+  <div class="page-head"><h2>Generate Security Report</h2><p>Select a report type to preview its structure. Export uses demo data.</p></div>
+  <div class="grid g5" style="margin-bottom:16px;">
+    ${types.map(t=>`<div class="chip ${selectedReport===t.id?'active':''}" style="cursor:pointer; text-align:center; justify-content:center; padding:12px;" onclick="selectReport('${t.id}')">${t.label}</div>`).join('')}
+  </div>
+  <div class="panel" style="max-width:640px; margin:0 auto; background:#fff; color:#111;">
+    <div style="border-bottom:2px solid #05070B; padding-bottom:14px; margin-bottom:16px;">
+      <div style="font-size:10px; letter-spacing:1px; color:#64748b;">NEXUS-GUARD X · SECURITY REPORT PREVIEW</div>
+      <div style="font-size:18px; font-weight:800; margin-top:4px;" id="report-title">Executive Report</div>
+      <div style="font-size:11px; color:#64748b; margin-top:2px;">Generated Aug 31, 2026 · Demo dataset</div>
+    </div>
+    <div id="report-body" style="font-size:12.5px; line-height:1.7; color:#1f2937;"></div>
+  </div>`;
+}
+const REPORT_SECTIONS = {
+  executive:['Executive Summary','Overall Compliance: 78%','Critical Risks: 4','Top Recommendation: Restrict Fortinet-FW-01 rule #27 (−42% risk)'],
+  technical:['Device Inventory (8 profiled)','Compliance Score by Device','Critical Findings with Evidence','Attack Paths (4 identified)','Risk Ranking'],
+  compliance:['CIS: 82%','NIST SP 800-53: 74%','DISA STIG: 71%','ISO/IEC 27001: 85%','Non-compliant control detail'],
+  device:['Per-device Security DNA','Configuration Evidence','Open Findings per Device'],
+  remediation:['Remediation Impact Ranking','What-if Simulation Results','Configuration Change Log'],
+};
+function selectReport(id){
+  selectedReport = id;
+  document.getElementById('pages').querySelector('#page-reports').innerHTML = pageReports();
+  renderReportPreview();
+}
+function renderReportPreview(){
+  const title = document.getElementById('report-title');
+  const body = document.getElementById('report-body');
+  if(!title) return;
+  const labels = {executive:'Executive Report', technical:'Technical Audit', compliance:'Compliance Report', device:'Device Report', remediation:'Remediation Report'};
+  title.textContent = labels[selectedReport];
+  body.innerHTML = REPORT_SECTIONS[selectedReport].map(s=>`<div style="padding:7px 0; border-bottom:1px solid #e5e7eb;">${s}</div>`).join('') + `<div style="margin-top:14px; text-align:center;"><button class="btn solid" onclick="alert('Prototype export — connect FastAPI backend to generate a downloadable PDF.')">Export PDF</button></div>`;
+}
+
+/* ---- Audit History ---- */
+function pageHistory(){
+  const events = [
+    {t:'Aug 31, 09:02', e:'Compliance scan completed — 24 devices, 78% overall', tag:'scan'},
+    {t:'Aug 30, 17:40', e:'Configuration change detected on Fortinet-FW-01 (rule #27 widened)', tag:'regression'},
+    {t:'Aug 29, 08:15', e:'Security regression detected: 84% → 78%', tag:'regression'},
+    {t:'Aug 28, 14:22', e:'AI Configuration Trainer: 3 mappings accepted on Generic-EdgeAppliance-04', tag:'ai'},
+    {t:'Aug 27, 11:05', e:'Palo Alto-FW-02 configuration re-ingested, compliance improved to 81%', tag:'scan'},
+    {t:'Aug 25, 09:00', e:'Baseline scan established across all vendors', tag:'scan'},
+  ];
+  return `
+  <div class="page-head"><h2>Audit History</h2><p>Chronological record of scans, changes, and trainer activity.</p></div>
+  <div class="panel">
+    ${events.map(ev=>`
+      <div style="display:flex; gap:16px; padding:13px 0; border-bottom:1px solid var(--border);">
+        <div class="mono" style="width:110px; flex-shrink:0; font-size:11.5px; color:var(--muted);">${ev.t}</div>
+        <div style="flex:1; font-size:12.8px;">${ev.e}</div>
+        <span class="badge ${ev.tag==='regression'?'b-critical':ev.tag==='ai'?'b-medium':'b-success'}">${ev.tag.toUpperCase()}</span>
+      </div>`).join('')}
+  </div>`;
+}
+
+/* ---- Settings ---- */
+function pageSettings(){
+  return `
+  <div class="page-head"><h2>Settings</h2><p>Console preferences and integration status. Demo values.</p></div>
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-head"><h3>Integrations</h3></div>
+      ${[['Cisco parser engine','Online'],['Fortinet parser engine','Online'],['Palo Alto parser engine','Online'],['Juniper parser engine','Online'],['Generic/AI-assisted parser','Online'],['FastAPI backend','Not connected — prototype mode'],['PostgreSQL data store','Not connected — prototype mode']].map(([k,v])=>`
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:12.8px;">
+          <span>${k}</span><span style="color:${v==='Online'?'var(--success)':'var(--muted)'};">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Risk Model Weighting</h3></div>
+      ${[['Severity',30],['Asset criticality',25],['Exposure',20],['Attack-path involvement',15],['Confidence',10]].map(([k,v])=>`
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;"><span>${k}</span><span class="mono">${v}%</span></div>
+          <div class="progress"><div style="width:${v*2.5}%; background:var(--primary);"></div></div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+const PAGE_RENDERERS = {
+  'page-dashboard': pageDashboard,
+  'page-devices': pageDevices,
+  'page-upload': pageUpload,
+  'page-analysis': pageAnalysis,
+  'page-twin': pageTwin,
+  'page-attackpaths': pageAttackPaths,
+  'page-dna': pageDna,
+  'page-compliance': pageCompliance,
+  'page-findings': pageFindings,
+  'page-priority': pagePriority,
+  'page-remediation': pageRemediation,
+  'page-simulator': pageSimulator,
+  'page-diff': pageDiff,
+  'page-trainer': pageTrainer,
+  'page-reports': pageReports,
+  'page-history': pageHistory,
+  'page-settings': pageSettings,
+};
+
+function buildPages(){
+  const wrap = document.getElementById('pages');
+  wrap.innerHTML = Object.keys(PAGE_RENDERERS).map(id=>`<div class="page" id="${id}">${PAGE_RENDERERS[id]()}</div>`).join('');
+}
+
+buildSidebar();
+buildPages();
+renderTwin('hero-twin-svg');
+document.querySelector(`.nav-item[data-page="page-dashboard"]`)?.classList.add('active');
+
+// post-build hooks that need DOM already present
+setTimeout(()=>{
+  renderComplianceTable();
+  renderTrainerQueue();
+  renderReportPreview();
+}, 0);
+</script>
+</body>
+</html>
